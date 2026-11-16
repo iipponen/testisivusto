@@ -2,7 +2,8 @@
 // generoimasta payload-types.ts:stä (pnpm --filter cms generate:types).
 import type { Form, Media, Page, SiteSetting } from '@cms/types'
 
-export const PAYLOAD_URL = (import.meta.env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000').replace(/\/$/, '')
+// Luetaan buildissa (astro.config.mjs lataa .env:n ja site.env:n).
+export const PAYLOAD_URL = (process.env.PAYLOAD_URL || 'http://localhost:3000').replace(/\/$/, '')
 
 async function get<T>(path: string): Promise<T> {
   const res = await fetch(`${PAYLOAD_URL}/api/${path}`)

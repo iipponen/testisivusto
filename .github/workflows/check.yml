@@ -24,7 +24,3 @@ jobs:
       - run: pnpm --filter web check
       - run: pnpm --filter cms build
       - run: pnpm --filter web build
-        env:
-          PUBLIC_PAYLOAD_URL: ${{ vars.PAYLOAD_URL }}
-          SITE_URL: ${{ vars.SITE_URL }}
-          BASE_PATH: ${{ vars.BASE_PATH }}

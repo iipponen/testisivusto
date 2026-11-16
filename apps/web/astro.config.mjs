@@ -1,11 +1,14 @@
 import tailwindcss from '@tailwindcss/vite'
 import { defineConfig } from 'astro/config'
-// .env (paikallinen kehitys); CI:ssä arvot tulevat ympäristömuuttujina.
-try {
-  process.loadEnvFile('.env')
-} catch {}
+// Asetukset: ympäristömuuttujat > .env (paikallinen, ei gitissä) >
+// site.env (tuotanto, gitissä). loadEnvFile ei korvaa jo asetettuja arvoja.
+for (const file of ['.env', 'site.env']) {
+  try {
+    process.loadEnvFile(file)
+  } catch {}
+}
 const env = process.env
-const payloadUrl = new URL(env.PUBLIC_PAYLOAD_URL || 'http://localhost:3000')
+const payloadUrl = new URL(env.PAYLOAD_URL || 'http://localhost:3000')
 
 export default defineConfig({
   // Staattinen sivusto: ei palvelinkoodia tuotannossa (ks. sivustoalustan
