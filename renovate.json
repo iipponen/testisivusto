@@ -1,32 +1,76 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":semanticCommitsDisabled"],
+  "extends": [
+    "config:recommended",
+    ":semanticCommitsDisabled"
+  ],
   "timezone": "Europe/Helsinki",
-  "schedule": ["* 0-6 1 * *"],
+  "schedule": [
+    "* 0-6 1 * *"
+  ],
   "minimumReleaseAge": "7 days",
   "rangeStrategy": "bump",
-  "lockFileMaintenance": { "enabled": true, "schedule": ["* 0-6 1 * *"] },
-  "vulnerabilityAlerts": { "enabled": true, "schedule": ["at any time"], "minimumReleaseAge": null },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": [
+      "* 0-6 1 * *"
+    ]
+  },
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "schedule": [
+      "at any time"
+    ],
+    "minimumReleaseAge": null
+  },
   "packageRules": [
     {
       "description": "Payloadin paketit aina samaan versioon",
-      "matchPackageNames": ["payload", "@payloadcms/**"],
+      "matchPackageNames": [
+        "payload",
+        "@payloadcms/**"
+      ],
       "groupName": "Payload"
     },
     {
       "description": "Astro ja Tailwind",
-      "matchPackageNames": ["astro", "@astrojs/**", "tailwindcss", "@tailwindcss/**"],
+      "matchPackageNames": [
+        "astro",
+        "@astrojs/**",
+        "tailwindcss",
+        "@tailwindcss/**"
+      ],
       "groupName": "Astro"
     },
     {
+      "description": "Playwright: npm-paketti ja CI-kontti samaan versioon",
+      "matchPackageNames": [
+        "@playwright/test",
+        "mcr.microsoft.com/playwright"
+      ],
+      "groupName": "Playwright"
+    },
+    {
       "description": "Muut pienet päivitykset yhteen PR:ään",
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchPackageNames": ["!payload", "!@payloadcms/**", "!astro", "!@astrojs/**"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchPackageNames": [
+        "!payload",
+        "!@payloadcms/**",
+        "!astro",
+        "!@astrojs/**",
+        "!@playwright/test",
+        "!mcr.microsoft.com/playwright"
+      ],
       "groupName": "Pienet päivitykset"
     },
     {
       "description": "GitHub Actions",
-      "matchManagers": ["github-actions"],
+      "matchManagers": [
+        "github-actions"
+      ],
       "groupName": "GitHub Actions"
     }
   ]

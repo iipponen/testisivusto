@@ -8,3 +8,6 @@ dist/
 apps/cms/media/
 *.tsbuildinfo
 /media/
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/screenshots/

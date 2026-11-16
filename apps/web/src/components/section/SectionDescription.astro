@@ -1,0 +1,11 @@
+---
+import type { HTMLAttributes } from 'astro/types'
+import { twMerge } from 'tailwind-merge'
+
+type Props = HTMLAttributes<'p'>
+const { class: className, ...props } = Astro.props
+---
+
+<p class={twMerge('text-lg text-pretty text-muted-foreground', className)} {...props}>
+  <slot />
+</p>

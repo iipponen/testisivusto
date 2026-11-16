@@ -1,0 +1,24 @@
+---
+// Osion runko. Rakenne Fulldev UI:sta (MIT, github.com/fulldotdev/ui).
+import type { HTMLAttributes } from 'astro/types'
+import { tv } from 'tailwind-variants'
+
+const section = tv({
+  base: 'relative flex scroll-mt-12 flex-col py-16 md:py-24',
+  variants: {
+    tone: {
+      default: 'bg-background',
+      muted: 'bg-muted',
+      primary: 'bg-primary text-primary-foreground',
+    },
+  },
+  defaultVariants: { tone: 'default' },
+})
+
+type Props = HTMLAttributes<'section'> & { tone?: 'default' | 'muted' | 'primary' }
+const { class: className, tone, ...props } = Astro.props
+---
+
+<section class={section({ tone, class: className })} data-slot="section" {...props}>
+  <slot />
+</section>
