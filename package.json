@@ -1,0 +1,17 @@
+{
+  "name": "testisivusto",
+  "private": true,
+  "packageManager": "pnpm@11.28.12",
+  "engines": {
+    "node": ">=24.22.1"
+  },
+  "scripts": {
+    "db:up": "docker compose -f compose.dev.yaml up -d",
+    "db:down": "docker compose -f compose.dev.yaml down",
+    "dev:cms": "pnpm --filter cms dev",
+    "dev:web": "pnpm --filter web dev",
+    "build:cms": "pnpm --filter cms build",
+    "build:web": "pnpm --filter web build",
+    "check": "pnpm -r check"
+  }
+}

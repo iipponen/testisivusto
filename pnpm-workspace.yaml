@@ -1,0 +1,22 @@
+packages:
+  - apps/*
+
+# Uusia pakettiversioita ei asenneta ennen kuin ne ovat olleet julkaistuina
+# viikon (minuutteina). Suojaa npm-toimitusketjuhyökkäyksiltä, ks.
+# sivustoalustan docs/arkkitehtuuri.md.
+minimumReleaseAge: 10080
+
+# Vain näiden pakettien asennusskriptit saavat ajaa.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true
+
+# TILAPÄINEN (2026-11-16): rolldown 1.2.18 kaatuu prosessoreilla, joissa ei
+# ole AVX2:ta (haahka, i5-3210M: "Illegal instruction"). 1.2.19 toimii.
+# Poista molemmat, kun vite vaatii >= 1.2.19 tai 1.2.19 on yli viikon vanha.
+overrides:
+  rolldown@1.2.18: 1.2.19
+minimumReleaseAgeExclude:
+  - rolldown
+  - '@rolldown/*'

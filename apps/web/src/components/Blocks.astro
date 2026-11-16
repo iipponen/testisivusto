@@ -1,0 +1,25 @@
+---
+// Payloadin lohkot → Astro-komponentit. Uusi lohko: skeema
+// apps/cms/src/blocks/index.ts + komponentti src/blocks/ + rivi tähän.
+import type { Page } from '@cms/types'
+
+import Cards from '../blocks/Cards.astro'
+import Content from '../blocks/Content.astro'
+import Cta from '../blocks/Cta.astro'
+import Form from '../blocks/Form.astro'
+import Hero from '../blocks/Hero.astro'
+
+interface Props {
+  blocks: Page['layout']
+}
+
+const components = { hero: Hero, content: Content, cards: Cards, cta: Cta, form: Form } as const
+const { blocks } = Astro.props
+---
+
+{
+  blocks.map((block) => {
+    const Component = components[block.blockType] as any
+    return Component ? <Component block={block} /> : null
+  })
+}

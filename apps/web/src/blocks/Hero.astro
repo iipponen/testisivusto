@@ -1,0 +1,43 @@
+---
+import type { Page } from '@cms/types'
+import { Image } from 'astro:assets'
+
+import Button from '../components/Button.astro'
+import { asMedia, linkHref } from '../lib/payload'
+
+type Block = Extract<Page['layout'][number], { blockType: 'hero' }>
+const { block } = Astro.props as { block: Block }
+const image = asMedia(block.image)
+---
+
+<section class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
+  <div class="space-y-6">
+    <h1 class="text-4xl font-bold sm:text-5xl">{block.heading}</h1>
+    {block.text && <p class="text-lg text-muted-foreground">{block.text}</p>}
+    {
+      block.links?.length ? (
+        <div class="flex flex-wrap gap-3">
+          {block.links.map((link, i) => {
+            const href = linkHref(link)
+            return href ? <Button href={href} variant={i === 0 ? 'primary' : 'secondary'}>{link.label}</Button> : null
+          })}
+        </div>
+      ) : null
+    }
+  </div>
+  {
+    image && (
+      <Image
+        src={image.url!}
+        alt={image.alt}
+        width={image.width!}
+        height={image.height!}
+        widths={[480, 800, 1200]}
+        sizes="(min-width: 768px) 50vw, 100vw"
+        class="aspect-[4/3] w-full rounded-lg object-cover"
+        loading="eager"
+        fetchpriority="high"
+      />
+    )
+  }
+</section>

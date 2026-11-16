@@ -1,0 +1,30 @@
+# Pull requestit (myös Renovaten): tyypit ja build. Sivuston build käyttää
+# tuotannon CMS:n julkista sisältöä (vain luku).
+name: Tarkistus
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter cms check
+      - run: pnpm --filter web check
+      - run: pnpm --filter cms build
+      - run: pnpm --filter web build
+        env:
+          PUBLIC_PAYLOAD_URL: ${{ vars.PAYLOAD_URL }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          BASE_PATH: ${{ vars.BASE_PATH }}

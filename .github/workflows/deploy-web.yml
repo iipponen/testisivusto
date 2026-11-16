@@ -1,0 +1,63 @@
+# Julkinen sivusto: Astro-build Payloadin sisällöstä → GitHub Pages.
+# Käynnistyy: push mainiin, Payloadin julkaisu (repository_dispatch),
+# kerran vuorokaudessa varmistuksena ja käsin.
+#
+# Repon muuttujat (Settings → Secrets and variables → Actions → Variables):
+#   PAYLOAD_URL  esim. https://<asiakas>-cms.rotas.fi
+#   SITE_URL     esim. https://<asiakas>.rotas.fi
+#   BASE_PATH    tyhjä, kun sivustolla on oma domain
+name: Sivusto
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/web/**
+      - apps/cms/src/payload-types.ts
+      - pnpm-lock.yaml
+      - .github/workflows/deploy-web.yml
+  repository_dispatch:
+    types: [payload-publish]
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter web
+      - name: Build
+        run: pnpm --filter web build
+        env:
+          PUBLIC_PAYLOAD_URL: ${{ vars.PAYLOAD_URL }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          BASE_PATH: ${{ vars.BASE_PATH }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: apps/web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

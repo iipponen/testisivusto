@@ -1,0 +1,21 @@
+---
+import type { GetStaticPaths } from 'astro'
+
+import Blocks from '../components/Blocks.astro'
+import Base from '../layouts/Base.astro'
+import { fetchPages, fetchSettings, HOME_SLUG } from '../lib/payload'
+
+export const getStaticPaths = (async () => {
+  const [pages, settings] = await Promise.all([fetchPages(), fetchSettings()])
+  return pages.map((page) => ({
+    params: { slug: page.slug === HOME_SLUG ? undefined : page.slug },
+    props: { page, settings },
+  }))
+}) satisfies GetStaticPaths
+
+const { page, settings } = Astro.props
+---
+
+<Base page={page} settings={settings}>
+  <Blocks blocks={page.layout} />
+</Base>

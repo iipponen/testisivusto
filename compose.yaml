@@ -1,0 +1,36 @@
+# Payload CMS sorsalla (tai muulla Docker-palvelimella nginx-proxyn takana).
+# Vaatii verkot nginx-proxy (iipponen/nginx) ja postgres (iipponen/postgres).
+#   cp .env.example .env && chmod 600 .env   # täytä
+#   mkdir -p media && docker compose up -d
+name: ${COMPOSE_PROJECT_NAME:?aseta .env:ssä}
+
+services:
+  cms:
+    image: ${CMS_IMAGE:?aseta .env:ssä}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      MEDIA_DIR: /data/media
+      VIRTUAL_HOST: ${CMS_HOST:?aseta .env:ssä}
+      VIRTUAL_PORT: "3000"
+      LETSENCRYPT_HOST: ${CMS_HOST}
+    volumes:
+      - ./media:/data/media
+    expose:
+      - "3000"
+    mem_limit: 768m
+    logging:
+      options:
+        max-size: "20m"
+        max-file: "3"
+    networks:
+      - proxy
+      - db
+
+networks:
+  proxy:
+    name: ${PROXY_NETWORK:-nginx-proxy}
+    external: true
+  db:
+    name: ${DB_NETWORK:-postgres}
+    external: true

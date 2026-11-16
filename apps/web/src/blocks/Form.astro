@@ -1,0 +1,123 @@
+---
+// Payloadin Form Builder -lomake. Lähetys selaimesta suoraan Payloadiin
+// (/api/form-submissions); Payload tallentaa vastauksen ja lähettää postin.
+import type { Page } from '@cms/types'
+
+import { asForm, PAYLOAD_URL } from '../lib/payload'
+import { richTextToHTML } from '../lib/richtext'
+
+type Block = Extract<Page['layout'][number], { blockType: 'form' }>
+const { block } = Astro.props as { block: Block }
+const form = asForm(block.form)
+const input =
+  'w-full rounded-lg border border-border bg-background px-3 py-2 focus-visible:outline-2 focus-visible:outline-ring'
+---
+
+{
+  form && (
+    <section class="mx-auto max-w-6xl px-4 py-12">
+      <div class="max-w-xl space-y-6">
+        {block.heading && <h2 class="text-3xl font-semibold">{block.heading}</h2>}
+        <form
+          class="payload-form space-y-5"
+          data-form-id={form.id}
+          data-endpoint={`${PAYLOAD_URL}/api/form-submissions`}
+          data-redirect={form.confirmationType === 'redirect' ? form.redirect?.url : undefined}
+          novalidate
+        >
+          {form.fields?.map((field) => {
+            const id = `f${form.id}-${'name' in field ? field.name : field.id}`
+            switch (field.blockType) {
+              case 'text':
+              case 'email':
+              case 'number':
+                return (
+                  <div class="space-y-1">
+                    <label for={id} class="font-medium">{field.label}{field.required && ' *'}</label>
+                    <input id={id} name={field.name} type={field.blockType} required={!!field.required} class={input} autocomplete={field.blockType === 'email' ? 'email' : field.name === 'nimi' ? 'name' : undefined} />
+                  </div>
+                )
+              case 'textarea':
+                return (
+                  <div class="space-y-1">
+                    <label for={id} class="font-medium">{field.label}{field.required && ' *'}</label>
+                    <textarea id={id} name={field.name} rows="5" required={!!field.required} class={input} />
+                  </div>
+                )
+              case 'select':
+                return (
+                  <div class="space-y-1">
+                    <label for={id} class="font-medium">{field.label}{field.required && ' *'}</label>
+                    <select id={id} name={field.name} required={!!field.required} class={input}>
+                      <option value="">Valitse…</option>
+                      {field.options?.map((o) => <option value={o.value}>{o.label}</option>)}
+                    </select>
+                  </div>
+                )
+              case 'checkbox':
+                return (
+                  <div class="flex items-start gap-2">
+                    <input id={id} name={field.name} type="checkbox" required={!!field.required} class="mt-1" />
+                    <label for={id}>{field.label}{field.required && ' *'}</label>
+                  </div>
+                )
+              case 'message':
+                return <div class="prose-content" set:html={richTextToHTML(field.message)} />
+              default:
+                return null
+            }
+          })}
+          {/* Roskapostiansa: ihminen ei näe eikä täytä tätä. */}
+          <div aria-hidden="true" class="hidden">
+            <label>Älä täytä<input name="_hp" tabindex="-1" autocomplete="off" /></label>
+          </div>
+          <p class="form-error hidden text-red-700" role="alert">Lähetys epäonnistui. Tarkista pakolliset kentät ja yritä uudelleen.</p>
+          <button type="submit" class="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
+            {form.submitButtonLabel || 'Lähetä'}
+          </button>
+        </form>
+        <div class="form-success prose-content hidden" role="status" tabindex="-1" set:html={richTextToHTML(form.confirmationMessage)} />
+      </div>
+    </section>
+  )
+}
+
+<script>
+  for (const form of document.querySelectorAll<HTMLFormElement>('form.payload-form')) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const error = form.querySelector<HTMLElement>('.form-error')!
+      const button = form.querySelector<HTMLButtonElement>('button[type=submit]')!
+      error.classList.add('hidden')
+      if (!form.reportValidity()) return
+      const data = new FormData(form)
+      if (data.get('_hp')) return
+      data.delete('_hp')
+      const submissionData = [...data.entries()].map(([field, value]) => ({ field, value: String(value) }))
+      for (const box of form.querySelectorAll<HTMLInputElement>('input[type=checkbox]')) {
+        if (!box.checked) submissionData.push({ field: box.name, value: 'false' })
+      }
+      button.disabled = true
+      try {
+        const res = await fetch(form.dataset.endpoint!, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ form: Number(form.dataset.formId), submissionData }),
+        })
+        if (!res.ok) throw new Error(String(res.status))
+        if (form.dataset.redirect) {
+          location.href = form.dataset.redirect
+          return
+        }
+        const success = form.nextElementSibling as HTMLElement
+        form.classList.add('hidden')
+        success.classList.remove('hidden')
+        success.focus()
+      } catch {
+        error.classList.remove('hidden')
+      } finally {
+        button.disabled = false
+      }
+    })
+  }
+</script>
