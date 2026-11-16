@@ -14,6 +14,11 @@ on:
   schedule:
     - cron: '23 4 * * 1'
   workflow_dispatch:
+  # Käynnistys julkaisutokenilla (sama kuin Payloadin .env:ssä):
+  #   curl -X POST -H "Authorization: Bearer $GITHUB_DISPATCH_TOKEN" \
+  #     https://api.github.com/repos/<omistaja>/<repo>/dispatches -d '{"event_type":"cms-image"}'
+  repository_dispatch:
+    types: [cms-image]
 
 permissions:
   contents: read
