@@ -1,5 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
-import { defineConfig } from 'astro/config'
+import { defineConfig, fontProviders } from 'astro/config'
 // Asetukset: ympäristömuuttujat > .env (paikallinen, ei gitissä) >
 // site.env (tuotanto, gitissä). loadEnvFile ei korvaa jo asetettuja arvoja.
 for (const file of ['.env', 'site.env']) {
@@ -22,6 +22,19 @@ export default defineConfig({
     // niitä CMS:stä ajon aikana.
     remotePatterns: [{ protocol: payloadUrl.protocol.replace(':', ''), hostname: payloadUrl.hostname }],
   },
+  // Fontit ladataan buildissa ja tarjoillaan sivustolta (ei Google Fontsia
+  // kävijän selaimeen). Vaihda fontti: name + tokens.css (--brand-font).
+  fonts: [
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Inter',
+      cssVariable: '--font-inter',
+      weights: ['400 700'],
+      styles: ['normal'],
+      subsets: ['latin', 'latin-ext'],
+      fallbacks: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+    },
+  ],
   vite: {
     plugins: [tailwindcss()],
   },

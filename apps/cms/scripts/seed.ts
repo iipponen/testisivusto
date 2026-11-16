@@ -66,7 +66,24 @@ const form = (
     fields: [
       { blockType: 'text', name: 'nimi', label: 'Nimi', required: true, width: 100 },
       { blockType: 'email', name: 'sahkoposti', label: 'Sähköposti', required: true, width: 100 },
+      {
+        blockType: 'select',
+        name: 'aihe',
+        label: 'Aihe',
+        width: 100,
+        options: [
+          { label: 'Tarjouspyyntö', value: 'tarjous' },
+          { label: 'Muu asia', value: 'muu' },
+        ],
+      },
       { blockType: 'textarea', name: 'viesti', label: 'Viesti', required: true, width: 100 },
+      {
+        blockType: 'checkbox',
+        name: 'tietosuoja',
+        label: 'Hyväksyn, että tietojani käytetään viestiini vastaamiseen.',
+        required: true,
+        width: 100,
+      },
     ],
     emails: [
       {

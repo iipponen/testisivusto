@@ -1,5 +1,7 @@
-# Pull requestit (myös Renovaten): tyypit ja build. Sivuston build käyttää
-# tuotannon CMS:n julkista sisältöä (vain luku).
+# Pull requestit (myös Renovaten): tyypit, buildit ja selaintestit
+# (sivut, saavutettavuus axe-corella, lomakkeen pakolliset kentät).
+# Sivuston build käyttää tuotannon CMS:n julkista sisältöä (vain luku).
+# Kuvakaappaukset: ajon artefakti "kuvakaappaukset".
 name: Tarkistus
 
 on:
@@ -12,6 +14,8 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
+    # Sama versio kuin apps/web/package.json:n @playwright/test.
+    container: mcr.microsoft.com/playwright:v1.63.0-noble
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -24,3 +28,15 @@ jobs:
       - run: pnpm --filter web check
       - run: pnpm --filter cms build
       - run: pnpm --filter web build
+      - run: pnpm --filter web test
+        env:
+          CI: '1'
+          HOME: /root
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: kuvakaappaukset
+          path: |
+            apps/web/screenshots/
+            apps/web/playwright-report/
+          retention-days: 14

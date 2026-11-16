@@ -21,9 +21,11 @@ Astro 7 + Payload 3 -monorepo, luotu `iipponen/sivustoalusta`-repon
 ```sh
 pnpm --filter cms check && pnpm --filter web check
 pnpm build:web          # CMS käynnissä
+# selaintestit + kuvakaappaukset: README → Kehitys
 ```
 
-Ulkoasumuutoksista kuvakaappaukset (mobiili + työpöytä) ennen ja jälkeen.
+Ulkoasumuutoksista: katso `apps/web/screenshots/` (mobiili + työpöytä) ennen
+ja jälkeen. Saavutettavuusvirheet (axe) korjataan, niitä ei ohiteta.
 
 ## Työtavat
 

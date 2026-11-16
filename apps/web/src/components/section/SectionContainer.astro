@@ -1,0 +1,12 @@
+---
+// Sisällön leveys ja reunat tokeneista --container ja --gutter.
+import type { HTMLAttributes } from 'astro/types'
+import { twMerge } from 'tailwind-merge'
+
+type Props = HTMLAttributes<'div'>
+const { class: className, ...props } = Astro.props
+---
+
+<div class={twMerge('relative mx-auto w-full max-w-(--container) px-(--gutter)', className)} {...props}>
+  <slot />
+</div>

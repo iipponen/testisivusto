@@ -1,7 +1,9 @@
 ---
+// Asettelu Fulldev UI:n cta-lohkoista (MIT, github.com/fulldotdev/ui).
 import type { Page } from '@cms/types'
 
-import Button from '../components/Button.astro'
+import { Section, SectionContainer, SectionTitle } from '../components/section'
+import { Button } from '../components/starwind/button'
 import { linkHref } from '../lib/payload'
 
 type Block = Extract<Page['layout'][number], { blockType: 'cta' }>
@@ -9,18 +11,16 @@ const { block } = Astro.props as { block: Block }
 const href = linkHref(block.link)
 ---
 
-<section class="mx-auto max-w-6xl px-4 py-12">
-  <div class="flex flex-col items-start gap-6 rounded-lg bg-primary p-8 text-primary-foreground md:flex-row md:items-center md:justify-between md:p-12">
-    <div class="space-y-2">
-      <h2 class="text-3xl font-semibold">{block.heading}</h2>
-      {block.text && <p class="opacity-90">{block.text}</p>}
-    </div>
+<Section tone="primary">
+  <SectionContainer class="flex flex-col items-center gap-6 text-center">
+    <SectionTitle class="max-w-2xl">{block.heading}</SectionTitle>
+    {block.text && <p class="max-w-xl text-lg text-pretty opacity-90">{block.text}</p>}
     {
       href && (
-        <a href={href} class="inline-flex rounded-lg bg-accent px-5 py-3 font-medium text-accent-foreground hover:bg-accent/90">
+        <Button href={href} size="lg" class="bg-highlight text-highlight-foreground hover:bg-highlight/90">
           {block.link.label}
-        </a>
+        </Button>
       )
     }
-  </div>
-</section>
+  </SectionContainer>
+</Section>

@@ -1,37 +1,61 @@
 ---
+// Asettelu Fulldev UI:n services-lohkoista (MIT, github.com/fulldotdev/ui).
 import type { Page } from '@cms/types'
 import { Image } from 'astro:assets'
 
+import { Section, SectionContainer, SectionDescription, SectionTitle } from '../components/section'
 import { asMedia, linkHref } from '../lib/payload'
 
 type Block = Extract<Page['layout'][number], { blockType: 'cards' }>
 const { block } = Astro.props as { block: Block }
+const count = block.items?.length ?? 0
 ---
 
-<section class="mx-auto max-w-6xl px-4 py-12">
-  {(block.heading || block.intro) && (
-    <div class="mb-8 max-w-2xl space-y-3">
-      {block.heading && <h2 class="text-3xl font-semibold">{block.heading}</h2>}
-      {block.intro && <p class="text-muted-foreground">{block.intro}</p>}
-    </div>
-  )}
-  <ul class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+<Section tone="muted">
+  <SectionContainer class="flex flex-col gap-10">
     {
-      block.items?.map((item) => {
-        const image = asMedia(item.image)
-        const href = linkHref(item.link)
-        return (
-          <li class="relative flex flex-col gap-3 rounded-lg border border-border p-6">
-            {image && (
-              <Image src={image.url!} alt={image.alt} width={image.width!} height={image.height!} widths={[400, 800]} sizes="(min-width: 1024px) 33vw, 100vw" class="aspect-video w-full rounded-md object-cover" />
-            )}
-            <h3 class="text-xl font-semibold">
-              {href ? <a href={href} class="after:absolute after:inset-0 hover:text-primary">{item.title}</a> : item.title}
-            </h3>
-            {item.text && <p class="text-muted-foreground">{item.text}</p>}
-          </li>
-        )
-      })
+      (block.heading || block.intro) && (
+        <div class="flex max-w-2xl flex-col gap-4">
+          {block.heading && <SectionTitle>{block.heading}</SectionTitle>}
+          {block.intro && <SectionDescription>{block.intro}</SectionDescription>}
+        </div>
+      )
     }
-  </ul>
-</section>
+    <ul class:list={['grid gap-6 sm:grid-cols-2', count >= 3 && 'lg:grid-cols-3', count === 4 && 'xl:grid-cols-4']}>
+      {
+        block.items?.map((item) => {
+          const image = asMedia(item.image)
+          const href = linkHref(item.link)
+          return (
+            <li class:list={['relative flex flex-col overflow-hidden rounded-xl border bg-card shadow-xs', href && 'transition-shadow hover:shadow-md']}>
+              {image && (
+                <Image
+                  src={image.url!}
+                  alt={image.alt}
+                  width={image.width!}
+                  height={image.height!}
+                  widths={[400, 800]}
+                  sizes="(min-width: 64rem) 22rem, (min-width: 40rem) 50vw, 100vw"
+                  class="aspect-[4/3] w-full object-cover"
+                />
+              )}
+              <div class="flex flex-1 flex-col gap-2 p-6">
+                <h3 class="text-xl font-semibold">
+                  {href ? (
+                    <a href={href} class="after:absolute after:inset-0 hover:text-primary">
+                      {item.title}
+                    </a>
+                  ) : (
+                    item.title
+                  )}
+                </h3>
+                {item.text && <p class="leading-relaxed text-muted-foreground">{item.text}</p>}
+                {href && item.link?.label && <span class="mt-auto pt-2 font-medium text-primary">{item.link.label} →</span>}
+              </div>
+            </li>
+          )
+        })
+      }
+    </ul>
+  </SectionContainer>
+</Section>

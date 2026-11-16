@@ -1,8 +1,10 @@
 ---
+// Asettelu Fulldev UI:n hero-lohkoista (MIT, github.com/fulldotdev/ui).
 import type { Page } from '@cms/types'
-import { Image } from 'astro:assets'
+import { Picture } from 'astro:assets'
 
-import Button from '../components/Button.astro'
+import { Section, SectionContainer, SectionDescription } from '../components/section'
+import { Button } from '../components/starwind/button'
 import { asMedia, linkHref } from '../lib/payload'
 
 type Block = Extract<Page['layout'][number], { blockType: 'hero' }>
@@ -10,34 +12,41 @@ const { block } = Astro.props as { block: Block }
 const image = asMedia(block.image)
 ---
 
-<section class="mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
-  <div class="space-y-6">
-    <h1 class="text-4xl font-bold sm:text-5xl">{block.heading}</h1>
-    {block.text && <p class="text-lg text-muted-foreground">{block.text}</p>}
+<Section>
+  <SectionContainer class:list={['grid items-center gap-10', image && 'lg:grid-cols-2 lg:gap-16']}>
+    <div class:list={['flex flex-col gap-6', !image && 'items-center text-center']}>
+      <h1 class="max-w-3xl text-4xl leading-[1.1] font-semibold sm:text-5xl lg:text-6xl">{block.heading}</h1>
+      {block.text && <SectionDescription class="max-w-xl">{block.text}</SectionDescription>}
+      {
+        block.links?.length ? (
+          <div class="flex flex-wrap gap-3">
+            {block.links.map((link, i) => {
+              const href = linkHref(link)
+              return href ? (
+                <Button href={href} size="lg" variant={i === 0 ? 'primary' : 'outline'}>
+                  {link.label}
+                </Button>
+              ) : null
+            })}
+          </div>
+        ) : null
+      }
+    </div>
     {
-      block.links?.length ? (
-        <div class="flex flex-wrap gap-3">
-          {block.links.map((link, i) => {
-            const href = linkHref(link)
-            return href ? <Button href={href} variant={i === 0 ? 'primary' : 'secondary'}>{link.label}</Button> : null
-          })}
-        </div>
-      ) : null
+      image && (
+        <Picture
+          src={image.url!}
+          alt={image.alt}
+          width={image.width!}
+          height={image.height!}
+          formats={['avif', 'webp']}
+          widths={[480, 800, 1200]}
+          sizes="(min-width: 64rem) 36rem, 100vw"
+          class="aspect-[4/3] w-full rounded-xl border object-cover"
+          loading="eager"
+          fetchpriority="high"
+        />
+      )
     }
-  </div>
-  {
-    image && (
-      <Image
-        src={image.url!}
-        alt={image.alt}
-        width={image.width!}
-        height={image.height!}
-        widths={[480, 800, 1200]}
-        sizes="(min-width: 768px) 50vw, 100vw"
-        class="aspect-[4/3] w-full rounded-lg object-cover"
-        loading="eager"
-        fetchpriority="high"
-      />
-    )
-  }
-</section>
+  </SectionContainer>
+</Section>

@@ -3,82 +3,109 @@
 // (/api/form-submissions); Payload tallentaa vastauksen ja lähettää postin.
 import type { Page } from '@cms/types'
 
+import { Section, SectionContainer, SectionTitle } from '../components/section'
+import { Button } from '../components/starwind/button'
+import { Input } from '../components/starwind/input'
+import { Label } from '../components/starwind/label'
+import { NativeSelect, NativeSelectOption } from '../components/starwind/native-select'
+import { Textarea } from '../components/starwind/textarea'
 import { asForm, PAYLOAD_URL } from '../lib/payload'
 import { richTextToHTML } from '../lib/richtext'
 
 type Block = Extract<Page['layout'][number], { blockType: 'form' }>
 const { block } = Astro.props as { block: Block }
 const form = asForm(block.form)
-const input =
-  'w-full rounded-lg border border-border bg-background px-3 py-2 focus-visible:outline-2 focus-visible:outline-ring'
 ---
 
 {
   form && (
-    <section class="mx-auto max-w-6xl px-4 py-12">
-      <div class="max-w-xl space-y-6">
-        {block.heading && <h2 class="text-3xl font-semibold">{block.heading}</h2>}
-        <form
-          class="payload-form space-y-5"
-          data-form-id={form.id}
-          data-endpoint={`${PAYLOAD_URL}/api/form-submissions`}
-          data-redirect={form.confirmationType === 'redirect' ? form.redirect?.url : undefined}
-          novalidate
-        >
-          {form.fields?.map((field) => {
-            const id = `f${form.id}-${'name' in field ? field.name : field.id}`
-            switch (field.blockType) {
-              case 'text':
-              case 'email':
-              case 'number':
-                return (
-                  <div class="space-y-1">
-                    <label for={id} class="font-medium">{field.label}{field.required && ' *'}</label>
-                    <input id={id} name={field.name} type={field.blockType} required={!!field.required} class={input} autocomplete={field.blockType === 'email' ? 'email' : field.name === 'nimi' ? 'name' : undefined} />
-                  </div>
-                )
-              case 'textarea':
-                return (
-                  <div class="space-y-1">
-                    <label for={id} class="font-medium">{field.label}{field.required && ' *'}</label>
-                    <textarea id={id} name={field.name} rows="5" required={!!field.required} class={input} />
-                  </div>
-                )
-              case 'select':
-                return (
-                  <div class="space-y-1">
-                    <label for={id} class="font-medium">{field.label}{field.required && ' *'}</label>
-                    <select id={id} name={field.name} required={!!field.required} class={input}>
-                      <option value="">Valitse…</option>
-                      {field.options?.map((o) => <option value={o.value}>{o.label}</option>)}
-                    </select>
-                  </div>
-                )
-              case 'checkbox':
-                return (
-                  <div class="flex items-start gap-2">
-                    <input id={id} name={field.name} type="checkbox" required={!!field.required} class="mt-1" />
-                    <label for={id}>{field.label}{field.required && ' *'}</label>
-                  </div>
-                )
-              case 'message':
-                return <div class="prose-content" set:html={richTextToHTML(field.message)} />
-              default:
-                return null
-            }
-          })}
-          {/* Roskapostiansa: ihminen ei näe eikä täytä tätä. */}
-          <div aria-hidden="true" class="hidden">
-            <label>Älä täytä<input name="_hp" tabindex="-1" autocomplete="off" /></label>
-          </div>
-          <p class="form-error hidden text-red-700" role="alert">Lähetys epäonnistui. Tarkista pakolliset kentät ja yritä uudelleen.</p>
-          <button type="submit" class="rounded-lg bg-primary px-5 py-3 font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-60">
-            {form.submitButtonLabel || 'Lähetä'}
-          </button>
-        </form>
-        <div class="form-success prose-content hidden" role="status" tabindex="-1" set:html={richTextToHTML(form.confirmationMessage)} />
-      </div>
-    </section>
+    <Section class="py-12 md:py-16">
+      <SectionContainer>
+        <div class="flex max-w-xl flex-col gap-6">
+          {block.heading && <SectionTitle>{block.heading}</SectionTitle>}
+          <form
+            class="payload-form flex flex-col gap-5"
+            data-form-id={form.id}
+            data-endpoint={`${PAYLOAD_URL}/api/form-submissions`}
+            data-redirect={form.confirmationType === 'redirect' ? form.redirect?.url : undefined}
+            novalidate
+          >
+            {form.fields?.map((field) => {
+              const id = `f${form.id}-${'name' in field ? field.name : field.id}`
+              const label = 'label' in field ? `${field.label ?? ''}${'required' in field && field.required ? ' *' : ''}` : ''
+              switch (field.blockType) {
+                case 'text':
+                case 'email':
+                case 'number':
+                  return (
+                    <div class="flex flex-col gap-2">
+                      <Label for={id}>{label}</Label>
+                      <Input
+                        id={id}
+                        name={field.name}
+                        type={field.blockType}
+                        required={!!field.required}
+                        autocomplete={field.blockType === 'email' ? 'email' : field.name === 'nimi' ? 'name' : undefined}
+                      />
+                    </div>
+                  )
+                case 'textarea':
+                  return (
+                    <div class="flex flex-col gap-2">
+                      <Label for={id}>{label}</Label>
+                      <Textarea id={id} name={field.name} rows={5} required={!!field.required} />
+                    </div>
+                  )
+                case 'select':
+                  return (
+                    <div class="flex flex-col gap-2 [&_[data-slot=native-select-wrapper]]:w-full">
+                      <Label for={id}>{label}</Label>
+                      <NativeSelect id={id} name={field.name} required={!!field.required}>
+                        <NativeSelectOption value="">Valitse…</NativeSelectOption>
+                        {field.options?.map((o) => <NativeSelectOption value={o.value}>{o.label}</NativeSelectOption>)}
+                      </NativeSelect>
+                    </div>
+                  )
+                case 'checkbox':
+                  // Natiivi valintaruutu: Starwindin Checkbox ei läpäise
+                  // axe-tarkistusta (nested-interactive, label ilman kohdetta).
+                  return (
+                    <div class="flex items-start gap-3">
+                      <input
+                        id={id}
+                        name={field.name}
+                        type="checkbox"
+                        value="true"
+                        required={!!field.required}
+                        class="mt-0.5 size-5 shrink-0 rounded-sm border-input text-primary focus:ring-3 focus:ring-outline/50 focus:ring-offset-0"
+                      />
+                      <Label for={id}>{label}</Label>
+                    </div>
+                  )
+                case 'message':
+                  return <div class="prose-content" set:html={richTextToHTML(field.message)} />
+                default:
+                  return null
+              }
+            })}
+            {/* Roskapostiansa: ihminen ei näe eikä täytä tätä. */}
+            <div aria-hidden="true" class="hidden">
+              <label>
+                Älä täytä
+                <input name="_hp" tabindex="-1" autocomplete="off" />
+              </label>
+            </div>
+            <p class="form-error hidden text-error" role="alert">
+              Lähetys epäonnistui. Tarkista pakolliset kentät ja yritä uudelleen.
+            </p>
+            <Button type="submit" variant="primary" size="lg" class="self-start">
+              {form.submitButtonLabel || 'Lähetä'}
+            </Button>
+          </form>
+          <div class="form-success prose-content hidden" role="status" tabindex="-1" set:html={richTextToHTML(form.confirmationMessage)} />
+        </div>
+      </SectionContainer>
+    </Section>
   )
 }
 
